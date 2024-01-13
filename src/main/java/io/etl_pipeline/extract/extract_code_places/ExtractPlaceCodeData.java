@@ -18,6 +18,13 @@ import java.util.Scanner;
 import java.util.Map;
 
 public class ExtractPlaceCodeData {
+    public static void main(String[] args) {
+        ExtractPlaceCodeData test = new ExtractPlaceCodeData();
+        List<Place> places = test.ExtractData(1);
+        System.out.println("done");
+    }
+
+    final private String resourcesFolderPath = "src/main/resources/";
 
     final private String requestUrlTemplate = "https://gw.yad2.co.il/address-autocomplete/realestate?text=";
     private Map<Integer, String> placeTypeMappingToFileName = Map.of(1, "cities.json", 2, "kibutzim.json",
@@ -26,12 +33,6 @@ public class ExtractPlaceCodeData {
     // ישוב,ישוב קהילתי,מועצה מקומית,ישוב חקלאי,מושב
     // TO DO: placeType 4 add other places, not only ישוב קהילתי
     public ExtractPlaceCodeData() {
-    }
-
-    public static void main(String[] args) {
-        ExtractPlaceCodeData test = new ExtractPlaceCodeData();
-        List<Place> places = test.ExtractData(2);
-        System.out.println("done");
     }
 
     /*
@@ -44,21 +45,21 @@ public class ExtractPlaceCodeData {
         }
         List<Place> foundPlaces = new ArrayList<>();
         try {
-            String placeTypeFileName = this.placeTypeMappingToFileName.get(placeTypeIndex);
-            String content = Files.readString(Paths.get("src/main/resources/" + placeTypeFileName));
+            String placeTypeFileName = placeTypeMappingToFileName.get(placeTypeIndex);
+            String content = Files.readString(Paths.get(resourcesFolderPath+ placeTypeFileName));
             JSONArray places = new JSONArray(content);
 
             // running over all places and gathering data
-            for (int i = 0; i < places.length(); i++) {
+            for (int i = 0; i < 20; i++) {
                 // getting json data from api
                 // TO DO: handle connection error
                 // TO DO: add Asynchronous requests
                 String encodedName = URLEncoder.encode(places.getString(i), StandardCharsets.UTF_8);
-                String requestUrl = this.requestUrlTemplate + encodedName;
-                String sourceData = this.sendGetRequest(requestUrl);
+                String requestUrl = requestUrlTemplate + encodedName;
+                String sourceData = sendGetRequest(requestUrl);
 
                 //deserialize data for specific place
-                Place deserializedPlace = this.DeserializeData(sourceData, placeNameForFilter[placeTypeIndex]);
+                Place deserializedPlace = DeserializeData(sourceData, placeNameForFilter[placeTypeIndex]);
                 if (deserializedPlace != null) {
                     System.out.println("%d out of %d ".formatted(i, places.length()));
                     foundPlaces.add(deserializedPlace);

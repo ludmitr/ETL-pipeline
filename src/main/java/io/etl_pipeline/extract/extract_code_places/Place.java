@@ -8,5 +8,5 @@ public class Place {
     private String text;
     private String info;
     private Value value;
-    private Map<String, Object> other;
+    private Other other;
 }
